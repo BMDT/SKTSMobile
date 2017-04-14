@@ -9,17 +9,11 @@ package com.shsyarbin.skts;
         import android.os.AsyncTask;
         import android.support.v7.app.AppCompatActivity;
         import android.os.Bundle;
-        import android.view.Menu;
-        import android.view.MenuItem;
         import android.view.View;
         import android.widget.Button;
         import android.widget.EditText;
         import android.widget.Toast;
-
-        import java.io.BufferedReader;
-        import java.io.InputStreamReader;
-        import java.net.HttpURLConnection;
-        import java.net.URL;
+        import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -55,6 +49,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+
     private void registerUser() {
         String nama = edttxtNama.getText().toString().trim().toLowerCase();
         String username = edttxtUsername.getText().toString().trim().toLowerCase();
@@ -65,16 +60,15 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void register(String nama, String username, String password, String email) {
-        String urlSuffix = "?nama="+nama+"&username="+username+"&password="+password+"&email="+email;
         class RegisterUser extends AsyncTask<String, Void, String>{
-
             ProgressDialog loading;
+            RegisterUserClass ruc = new RegisterUserClass();
 
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                loading = ProgressDialog.show(RegisterActivity.this, "Tunggu Sebentar",null, true, true);
+                loading = ProgressDialog.show(RegisterActivity.this, "Please Wait",null, true, true);
             }
 
             @Override
@@ -86,25 +80,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
             @Override
             protected String doInBackground(String... params) {
-                String s = params[0];
-                BufferedReader bufferedReader = null;
-                try {
-                    URL url = new URL(REGISTER_URL+s);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
-                    String result;
+                HashMap<String, String> data = new HashMap<String,String>();
+                data.put("nama",params[0]);
+                data.put("username",params[1]);
+                data.put("password",params[2]);
+                data.put("email",params[3]);
 
-                    result = bufferedReader.readLine();
+                String result = ruc.sendPostRequest(REGISTER_URL,data);
 
-                    return result;
-                }catch(Exception e){
-                    return null;
-                }
+                return  result;
             }
         }
 
         RegisterUser ru = new RegisterUser();
-        ru.execute(urlSuffix);
+        ru.execute(nama,username,password,email);
     }
 }
